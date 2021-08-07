@@ -21,6 +21,9 @@ Resources:
           Properties:
             Path: /issue
             Method: get
+      Environment:
+        Variables:
+          SEED: YourThirtyTwoBytesHexStringSeed
 Outputs:
   VCIssuerApi:
     Description: API Gateway endpoint URL for Prod stage for Issue function

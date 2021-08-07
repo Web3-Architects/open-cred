@@ -4,10 +4,15 @@ const { DID } = require("dids");
 const KeyResolver = require("key-did-resolver");
 const { Ed25519Provider } = require("key-did-provider-ed25519");
 
+const { hexStringToUint8Array } = require("./utils/conversions");
+
+if (!process.env.SEED) {
+  throw new Error("SEED env variable must be defined");
+}
 const seed = hexStringToUint8Array(process.env.SEED);
 
 const provider = new Ed25519Provider(seed);
-const did = new DID({ provider, resolver: KeyResolver.getResolver() });
+const did = new DID({ provider, resolver: KeyResolver.default.getResolver() });
 
 let response;
 
