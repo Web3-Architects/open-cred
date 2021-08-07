@@ -9,6 +9,7 @@
   "dependencies": {
     "axios": "^0.21.1",
     "dids": "^2.4.0",
+    "key-did-provider-ed25519": "^1.1.0",
     "key-did-resolver": "^1.2.1"
   },
   "scripts": {
