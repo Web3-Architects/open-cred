@@ -1,0 +1,40 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: 'lambda
+
+  Lambda function to issue Verifiable Credentials
+
+  '
+Globals:
+  Function:
+    Timeout: 3
+Resources:
+  VCIssuerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: VCIssuerFunction
+      Handler: app.lambdaHandler
+      Runtime: nodejs14.x
+      Events:
+        Issue:
+          Type: Api
+          Properties:
+            Path: /issue
+            Method: get
+Outputs:
+  VCIssuerApi:
+    Description: API Gateway endpoint URL for Prod stage for Issue function
+    Value:
+      Fn::Sub: https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello/
+  VCIssuerFunction:
+    Description: Issue Lambda Function ARN
+    Value:
+      Fn::GetAtt:
+      - VCIssuerFunction
+      - Arn
+  VCIssuerFunctionIamRole:
+    Description: Implicit IAM Role created for Issue function
+    Value:
+      Fn::GetAtt:
+      - VCIssuerFunctionRole
+      - Arn
