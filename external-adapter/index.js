@@ -22,6 +22,8 @@ const customError = (data) => {
 // should be required.
 const customParams = {
   subject: ["subject", "sub"],
+  platform: ["platform"],
+  name: ["name", "title"],
   endpoint: false,
 };
 
@@ -32,7 +34,9 @@ const createRequest = (input, callback) => {
   const endpoint = validator.validated.data.endpoint || "issue";
   const url = `${issuerApiUrl}${endpoint}`;
 
-  const params = {};
+  const params = {
+    ...validator.validated.data,
+  };
 
   // This is where you would add method and headers
   // you can add method like GET or POST and add it to the config
