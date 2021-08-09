@@ -15,6 +15,10 @@ const provider = new Ed25519Provider(seed);
 const did = new DID({ provider, resolver: KeyResolver.default.getResolver() });
 
 let response;
+let InvalidRequestReponse = {
+  statusCode: 400,
+  body: "Invalid request",
+};
 
 /**
  *
@@ -33,21 +37,49 @@ exports.lambdaHandler = async (event, context) => {
   try {
     await did.authenticate();
     // Read the DID string - this will throw an error if the DID instance is not authenticated
-    console.info(`Authenticated with did: `, did.id);
   } catch (e) {
     console.error(`Error authenticating did`, e);
     return e;
   }
+  const { queryStringParameters } = event;
+
+  if (!queryStringParameters) return InvalidRequestReponse;
+
+  const { subject, ...certificateDetails } = queryStringParameters;
+
+  if (!subject) return InvalidRequestReponse;
+
+  const credentialsData = {
+    "@context": ["https://www.w3.org/2018/credentials/v1"],
+    type: ["VerifiableCredential"],
+    credentialSubject: {
+      id: subject,
+      certificate: certificateDetails,
+    },
+    issuanceDate: new Date().toISOString(),
+  };
 
   // Create a JWS - this will throw an error if the DID instance is not authenticated
-  const jws = await did.createJWS({ hello: "world" });
-  console.info(`JWS created: `, jws);
+  const jws = await did.createJWS(
+    {
+      sub: did.id,
+      nbf: Math.floor(Date.now() / 1000),
+      vc: credentialsData,
+    },
+    { did: did.id }
+  );
+
+  const finalDocument = { credentials: credentialsData, jws };
+  console.info(`Credentials document: `, finalDocument);
 
   try {
     // const ret = await axios(url);
     response = {
       statusCode: 200,
-      body: JSON.stringify(jws),
+      body: JSON.stringify({
+        credentials: credentialsData,
+        streamId: "mockStreamId",
+      }),
     };
   } catch (err) {
     console.log(err);
