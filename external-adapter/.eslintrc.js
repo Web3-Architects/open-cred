@@ -3,19 +3,18 @@ module.exports = {
     browser: true,
     commonjs: true,
     es6: true,
-    mocha: true
+    mocha: true,
   },
-  extends: [
-    'standard'
-  ],
+  extends: ["standard", "prettier"],
   globals: {
-    Atomics: 'readonly',
-    SharedArrayBuffer: 'readonly'
+    Atomics: "readonly",
+    SharedArrayBuffer: "readonly",
   },
   parserOptions: {
-    ecmaVersion: 2018
+    ecmaVersion: 2018,
   },
   rules: {
-    'standard/no-callback-literal': 0
-  }
-}
+    "standard/no-callback-literal": 0,
+  },
+  plugins: ["prettier"],
+};
