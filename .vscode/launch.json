@@ -3,11 +3,11 @@
     {
       "type": "aws-sam",
       "request": "direct-invoke",
-      "name": "lambda:HelloWorldFunction (nodejs14.x)",
+      "name": "lambda:VCIssuerFunction (nodejs14.x)",
       "invokeTarget": {
         "target": "template",
         "templatePath": "${workspaceFolder}/lambda/template.yaml",
-        "logicalId": "HelloWorldFunction"
+        "logicalId": "VCIssuerFunction"
       },
       "lambda": {
         "payload": {},
@@ -18,11 +18,11 @@
     {
       "type": "aws-sam",
       "request": "direct-invoke",
-      "name": "API lambda:HelloWorldFunction (nodejs14.x)",
+      "name": "API lambda:VCIssuerFunction (nodejs14.x)",
       "invokeTarget": {
         "target": "api",
         "templatePath": "${workspaceFolder}/lambda/template.yaml",
-        "logicalId": "HelloWorldFunction"
+        "logicalId": "VCIssuerFunction"
       },
       "api": {
         "path": "/hello",

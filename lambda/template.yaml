@@ -33,7 +33,7 @@ Outputs:
   # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
   VCIssuerApi:
     Description: "API Gateway endpoint URL for Prod stage for Issue function"
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello/"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/issue/"
   VCIssuerFunction:
     Description: "Issue Lambda Function ARN"
     Value: !GetAtt VCIssuerFunction.Arn
