@@ -6,8 +6,8 @@ const { Ed25519Provider } = require("key-did-provider-ed25519");
 
 const { hexStringToUint8Array } = require("./utils/conversions");
 
-if (!process.env.SEED) {
-  throw new Error("SEED env variable must be defined");
+if (!process.env.SEED || !process.env.ENTITY_NAME) {
+  throw new Error("Env variables must be defined");
 }
 const seed = hexStringToUint8Array(process.env.SEED);
 
@@ -54,7 +54,10 @@ exports.lambdaHandler = async (event, context) => {
     type: ["VerifiableCredential"],
     credentialSubject: {
       id: subject,
-      certificate: certificateDetails,
+      certificate: {
+        entity: process.env.ENTITY_NAME,
+        ...certificateDetails,
+      },
     },
     issuanceDate: new Date().toISOString(),
   };
