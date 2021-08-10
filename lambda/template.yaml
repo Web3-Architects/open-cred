@@ -26,6 +26,7 @@ Resources:
       Environment:
         Variables:
           SEED: YourThirtyTwoBytesHexStringSeed
+          ENTITY_NAME: YourEntityName
 
 Outputs:
   # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
