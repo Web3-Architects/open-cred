@@ -22,7 +22,7 @@ const customError = (data) => {
 // should be required.
 const customParams = {
   subject: ["subject", "sub"],
-  name: ["name", "title"],
+  title: ["title", "name"],
   endpoint: false,
 };
 
