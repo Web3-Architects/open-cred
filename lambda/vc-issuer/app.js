@@ -81,7 +81,7 @@ exports.lambdaHandler = async (event, context) => {
       statusCode: 200,
       body: JSON.stringify({
         credentials: credentialsData,
-        streamId: "mockStreamId",
+        streamId: `mockStreamIdfor${subject}`,
       }),
     };
   } catch (err) {
