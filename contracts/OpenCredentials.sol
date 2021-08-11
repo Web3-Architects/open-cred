@@ -4,12 +4,13 @@ pragma solidity ^0.8.2;
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "./VCNFT.sol";
 import "./ChainlinkCredentialsClient.sol";
+import "./IOpenCredentials.sol";
 
-contract OpenCredentials is AccessControl, VCNFT, ChainlinkCredentialsClient {
+contract OpenCredentials is IOpenCredentials, AccessControl, VCNFT, ChainlinkCredentialsClient {
     
     
-    function issueCredentials(address to, string memory didSubject, string memory credentialName) public onlyRole(MINTER_ROLE) returns (bytes32 requestId) {
-       return _requestVCIssuance(this.fulfillVCIssuance.selector, to, didSubject, credentialName);
+    function issueCredentials(address to, string memory didSubject, string memory credentialName) external override onlyRole(MINTER_ROLE) {
+       _requestVCIssuance(this.fulfillVCIssuance.selector, to, didSubject, credentialName);
     }
     
      /**
@@ -20,7 +21,7 @@ contract OpenCredentials is AccessControl, VCNFT, ChainlinkCredentialsClient {
     }
     
     
-     function supportsInterface(bytes4 interfaceId)
+    function supportsInterface(bytes4 interfaceId)
         public
         view
         virtual
