@@ -8,7 +8,6 @@ import "./IOpenCredentials.sol";
 
 contract OpenCredentials is IOpenCredentials, AccessControl, VCNFT, ChainlinkCredentialsClient {
     
-    
     function issueCredentials(address to, string memory credentialSubject, string memory credentialName) external override onlyRole(MINTER_ROLE) {
        _requestVCIssuance(this.fulfillVCIssuance.selector, to, credentialSubject, credentialName);
     }
@@ -16,8 +15,8 @@ contract OpenCredentials is IOpenCredentials, AccessControl, VCNFT, ChainlinkCre
      /**
      * Callback function
      */
-    function fulfillVCIssuance(bytes32 _requestId, bytes32 to, bytes32 tokenURI) public recordChainlinkFulfillment(_requestId) {
-        _safeMint(address(uint160(uint256(to))), string(abi.encodePacked(tokenURI)));
+    function fulfillVCIssuance(bytes32 _requestId, bytes32 tokenURI) public recordChainlinkFulfillment(_requestId) {
+        _safeMint(requestIdToRecipient[_requestId], string(abi.encodePacked(tokenURI)));
     }
     
     

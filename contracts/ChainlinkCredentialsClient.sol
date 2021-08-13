@@ -11,7 +11,8 @@ contract ChainlinkCredentialsClient is AccessControl, ChainlinkClient {
     bytes32 private jobId;
     uint256 private fee;
     
-    bytes32 public result;
+    // This is so the contract can keep track of who to assign the result to when it comes back.
+    mapping(bytes32 => address) internal requestIdToRecipient;
 
     constructor() {
         setPublicChainlinkToken();
@@ -29,7 +30,9 @@ contract ChainlinkCredentialsClient is AccessControl, ChainlinkClient {
         request.add("recipientAddress", string(abi.encodePacked(to)));
         request.add("subject", credentialSubject);
         request.add("title", credentialName);
-        
+
+        requestIdToRecipient[request.id] = to;
+
         // Sends the request
         return sendChainlinkRequestTo(oracle, request, fee);
     }
