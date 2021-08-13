@@ -2,5 +2,5 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 interface IOpenCredentials {
-    function issueCredentials(address to, string memory didSubject, string memory credentialName) external;
+    function issueCredentials(address to, string memory credentialSubject, string memory credentialName) external;
 }

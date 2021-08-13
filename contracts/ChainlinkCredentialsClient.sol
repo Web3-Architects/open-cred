@@ -23,11 +23,11 @@ contract ChainlinkCredentialsClient is AccessControl, ChainlinkClient {
     /**
      * Initial request
      */
-    function _requestVCIssuance(bytes4 functionSelector, address to, string memory subject, string memory credentialName) internal returns (bytes32 requestId) {
+    function _requestVCIssuance(bytes4 functionSelector, address to, string memory credentialSubject, string memory credentialName) internal returns (bytes32 requestId) {
         Chainlink.Request memory request = buildChainlinkRequest(jobId, address(this), functionSelector);
         
         request.add("recipientAddress", string(abi.encodePacked(to)));
-        request.add("subject", subject);
+        request.add("subject", credentialSubject);
         request.add("title", credentialName);
         
         // Sends the request

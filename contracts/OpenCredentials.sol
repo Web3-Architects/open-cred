@@ -9,8 +9,8 @@ import "./IOpenCredentials.sol";
 contract OpenCredentials is IOpenCredentials, AccessControl, VCNFT, ChainlinkCredentialsClient {
     
     
-    function issueCredentials(address to, string memory didSubject, string memory credentialName) external override onlyRole(MINTER_ROLE) {
-       _requestVCIssuance(this.fulfillVCIssuance.selector, to, didSubject, credentialName);
+    function issueCredentials(address to, string memory credentialSubject, string memory credentialName) external override onlyRole(MINTER_ROLE) {
+       _requestVCIssuance(this.fulfillVCIssuance.selector, to, credentialSubject, credentialName);
     }
     
      /**
