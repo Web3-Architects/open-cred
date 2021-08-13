@@ -12,7 +12,7 @@ contract ChainlinkCredentialsClient is AccessControl, ChainlinkClient {
     uint256 private fee;
     
     // This is so the contract can keep track of who to assign the result to when it comes back.
-    mapping(bytes32 => address) internal requestIdToRecipient;
+    mapping(bytes32 => address) public requestIdToRecipient;
 
     constructor() {
         setPublicChainlinkToken();
@@ -24,17 +24,16 @@ contract ChainlinkCredentialsClient is AccessControl, ChainlinkClient {
     /**
      * Initial request
      */
-    function _requestVCIssuance(bytes4 functionSelector, address to, string memory credentialSubject, string memory credentialName) internal returns (bytes32 requestId) {
+    function _requestVCIssuance(bytes4 functionSelector, address to, string memory credentialSubject, string memory credentialName) internal {
         Chainlink.Request memory request = buildChainlinkRequest(jobId, address(this), functionSelector);
         
-        request.add("recipientAddress", string(abi.encodePacked(to)));
         request.add("subject", credentialSubject);
         request.add("title", credentialName);
 
-        requestIdToRecipient[request.id] = to;
-
         // Sends the request
-        return sendChainlinkRequestTo(oracle, request, fee);
+        bytes32 requestId = sendChainlinkRequestTo(oracle, request, fee);
+        
+        requestIdToRecipient[requestId] = to;
     }
     
    

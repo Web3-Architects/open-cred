@@ -29,4 +29,9 @@ contract OpenCredentials is IOpenCredentials, AccessControl, VCNFT, ChainlinkCre
     {
         return super.supportsInterface(interfaceId);
     }
+    
+    // To be removed
+    function destroy() onlyRole(DEFAULT_ADMIN_ROLE) public {
+        selfdestruct(payable(msg.sender));
+    }
 }
