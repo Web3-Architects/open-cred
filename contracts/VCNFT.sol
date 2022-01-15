@@ -12,12 +12,12 @@ contract VCNFT is IVCNFT, ERC721, ERC721URIStorage, Pausable, AccessControl {
     using Counters for Counters.Counter;
 
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
+    bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
+    bytes32 public constant BURNER_ROLE = keccak256("BURNER_ROLE");
 
     Counters.Counter private _tokenIdCounter;
     string baseURI;
 
-    // @dev Maps minter's address to lesson id
-    mapping(address => bytes32) public addressToLessonId;
     // @dev Maps student => lessonId => balance
     mapping(address => mapping(bytes32 => uint256)) public credentialBalances;
     // TODO: Embed lessonId inside tokenId
@@ -28,10 +28,6 @@ contract VCNFT is IVCNFT, ERC721, ERC721URIStorage, Pausable, AccessControl {
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _setupRole(PAUSER_ROLE, msg.sender);
     }
-
-    function setLessonId(address minterAddress, bytes32 lessonId) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        addressToLessonId[minterAddress] = lessonId;
-    }    
 
     function pause() public onlyRole(PAUSER_ROLE) {
         _pause();
@@ -63,10 +59,7 @@ contract VCNFT is IVCNFT, ERC721, ERC721URIStorage, Pausable, AccessControl {
         return super.supportsInterface(interfaceId);
     }
 
-    function mint(address to_, string memory tokenURI_) external override {
-        bytes32 lessonId = addressToLessonId[msg.sender];
-        require(lessonId != 0, "Minter has no lesson assigned");
-
+    function mint(address to_, bytes32 lessonId, string memory tokenURI_) external override onlyRole(MINTER_ROLE) {
         _mint(to_, lessonId, tokenURI_);
     }
 
@@ -84,7 +77,7 @@ contract VCNFT is IVCNFT, ERC721, ERC721URIStorage, Pausable, AccessControl {
     function burn(uint256 tokenId) external {
         bytes32 lessonId = tokenIdToLessonId[tokenId];
         address tokenOwner = ownerOf(tokenId);
-        require(tokenOwner == msg.sender || lessonId == addressToLessonId[msg.sender], "Only owners or minters can burn tokens");
+        require(tokenOwner == msg.sender || hasRole(BURNER_ROLE, msg.sender), "Unauthorized to burn token");
 
         credentialBalances[tokenOwner][lessonId] -= 1; 
 

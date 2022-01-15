@@ -9,9 +9,14 @@ contract ChainlinkCredentialsClient is AccessControl, ChainlinkClient {
     
     bytes32 public jobId;
     uint256 private fee;
-    
+
+    struct Request {
+        address recipient;
+        bytes32 credentialId;
+    }
     // This is so the contract can keep track of who to assign the result to when it comes back.
-    mapping(bytes32 => address) public requestIdToRecipient;
+    // TODO: Receive this info directly from Chainlink response instead of storing them on-chain?
+    mapping(bytes32 => Request) public requestIdToRequest;
 
     constructor() {
         setPublicChainlinkToken();
@@ -23,7 +28,7 @@ contract ChainlinkCredentialsClient is AccessControl, ChainlinkClient {
     /**
      * Initial request
      */
-    function _requestVCIssuance(bytes4 functionSelector, address to, string memory credentialSubject, string memory credentialName) internal {
+    function _requestVCIssuance(bytes4 functionSelector, address to, bytes32 credentialId, string memory credentialSubject, string memory credentialName) internal {
         Chainlink.Request memory request = buildOperatorRequest(jobId, functionSelector);
         
         request.add("subject", credentialSubject);
@@ -32,7 +37,7 @@ contract ChainlinkCredentialsClient is AccessControl, ChainlinkClient {
         // Sends the request
         bytes32 requestId = sendOperatorRequest(request, fee);
         
-        requestIdToRecipient[requestId] = to;
+        requestIdToRequest[requestId] = Request(to, credentialId);
     }
     
    

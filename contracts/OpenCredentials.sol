@@ -7,25 +7,34 @@ import "./IOpenCredentials.sol";
 import "./IVCNFT.sol";
 
 contract OpenCredentials is IOpenCredentials, AccessControl, ChainlinkCredentialsClient {
-    bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     
     IVCNFT public vcNFT;
+    // @dev Maps contract's address to credential id
+    mapping(address => bytes32) public addressToCredentialId;
 
     constructor(address nftAddress_) {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         vcNFT = IVCNFT(nftAddress_);
     }
 
+    // `contractAddress` must not be the zero-address
+    // `credentialId` must not be 0
+    function setCredentialId(address contractAddress, bytes32 credentialId) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        addressToCredentialId[contractAddress] = credentialId;
+    } 
 
-    function issueCredentials(address to, string memory credentialSubject, string memory credentialName) external override onlyRole(MINTER_ROLE) {
-       _requestVCIssuance(this.fulfillVCIssuance.selector, to, credentialSubject, credentialName);
+    function issueCredentials(address to, string memory credentialSubject, string memory credentialName) external override {
+        bytes32 credentialId = addressToCredentialId[msg.sender];
+        require(credentialId != 0, "No credential id assigned");
+       _requestVCIssuance(this.fulfillVCIssuance.selector, to, credentialId, credentialSubject, credentialName);
     }
-    
-     /**
+
+    /**
      * Callback function
      */
     function fulfillVCIssuance(bytes32 _requestId, bytes memory tokenURI) public recordChainlinkFulfillment(_requestId) {
-        vcNFT.mint(requestIdToRecipient[_requestId], string(abi.encodePacked(tokenURI)));
+        Request memory request = requestIdToRequest[_requestId];
+        vcNFT.mint(request.recipient, request.credentialId, string(abi.encodePacked(tokenURI)));
     }
     
     function supportsInterface(bytes4 interfaceId)
