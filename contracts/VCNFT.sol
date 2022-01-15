@@ -2,35 +2,36 @@
 pragma solidity ^0.8.2;
 
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
+import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/security/Pausable.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
+import "./IVCNFT.sol";
 
-contract VCNFT is ERC721Enumerable, ERC721URIStorage, Pausable, AccessControl {
+contract VCNFT is IVCNFT, ERC721, ERC721URIStorage, Pausable, AccessControl {
     using Counters for Counters.Counter;
 
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
-    bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
+
     Counters.Counter private _tokenIdCounter;
     string baseURI;
+
+    // @dev Maps minter's address to lesson id
+    mapping(address => bytes32) public addressToLessonId;
+    // @dev Maps student => lessonId => balance
+    mapping(address => mapping(bytes32 => uint256)) public credentialBalances;
+    // TODO: Embed lessonId inside tokenId
+    mapping(uint256 => bytes32) public tokenIdToLessonId;
+
 
     constructor() ERC721("OpenClassesCredentials", "OCC") {
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _setupRole(PAUSER_ROLE, msg.sender);
-        _setupRole(MINTER_ROLE, msg.sender);
     }
 
-    function _safeMint(address to_, string memory tokenURI_) internal onlyRole(MINTER_ROLE) {
-        uint256 currentTokenId =  _tokenIdCounter.current();
-        _safeMint(to_, currentTokenId);
-        _setTokenURI(currentTokenId, tokenURI_);
-        _tokenIdCounter.increment();
-    }
-    
-     function _burn(uint256 tokenId) internal override(ERC721, ERC721URIStorage) {
-       return super._burn(tokenId);
-    }
+    function setLessonId(address minterAddress, bytes32 lessonId) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        addressToLessonId[minterAddress] = lessonId;
+    }    
 
     function pause() public onlyRole(PAUSER_ROLE) {
         _pause();
@@ -38,14 +39,6 @@ contract VCNFT is ERC721Enumerable, ERC721URIStorage, Pausable, AccessControl {
 
     function unpause() public onlyRole(PAUSER_ROLE) {
         _unpause();
-    }
-
-    function _beforeTokenTransfer(address from, address to, uint256 tokenId)
-        internal
-        whenNotPaused
-        override(ERC721, ERC721Enumerable)
-    {
-        super._beforeTokenTransfer(from, to, tokenId);
     }
     
     function setBaseURI(string memory newBaseURI) public onlyRole(DEFAULT_ADMIN_ROLE) {
@@ -56,7 +49,7 @@ contract VCNFT is ERC721Enumerable, ERC721URIStorage, Pausable, AccessControl {
         return baseURI;
     }
     
-     function tokenURI(uint256 _tokenId) public view override(ERC721, ERC721URIStorage) returns (string memory) {
+    function tokenURI(uint256 _tokenId) public view override(ERC721, ERC721URIStorage) returns (string memory) {
         return ERC721URIStorage.tokenURI(_tokenId);
     }
 
@@ -64,9 +57,52 @@ contract VCNFT is ERC721Enumerable, ERC721URIStorage, Pausable, AccessControl {
         public
         view
         virtual
-        override(ERC721, ERC721Enumerable, AccessControl)
+        override(ERC721, AccessControl)
         returns (bool)
     {
         return super.supportsInterface(interfaceId);
+    }
+
+    function mint(address to_, string memory tokenURI_) external override {
+        bytes32 lessonId = addressToLessonId[msg.sender];
+        require(lessonId != 0, "Minter has no lesson assigned");
+
+        _mint(to_, lessonId, tokenURI_);
+    }
+
+    function _mint(address to_, bytes32 lessonId, string memory tokenURI_) internal {
+        uint256 currentTokenId = _tokenIdCounter.current();
+
+        _safeMint(to_, currentTokenId);
+        _setTokenURI(currentTokenId, tokenURI_);
+        credentialBalances[to_][lessonId] += 1;
+        tokenIdToLessonId[currentTokenId] = lessonId;
+
+        _tokenIdCounter.increment();
+    }
+
+    function burn(uint256 tokenId) external {
+        bytes32 lessonId = tokenIdToLessonId[tokenId];
+        address tokenOwner = ownerOf(tokenId);
+        require(tokenOwner == msg.sender || lessonId == addressToLessonId[msg.sender], "Only owners or minters can burn tokens");
+
+        credentialBalances[tokenOwner][lessonId] -= 1; 
+
+        _burn(tokenId);
+    }
+    
+    function _burn(uint256 tokenId) internal override(ERC721, ERC721URIStorage) {
+       return super._burn(tokenId);
+    }
+
+    function _beforeTokenTransfer(address from, address to, uint256 tokenId)
+        internal
+        whenNotPaused
+        override(ERC721)
+    {
+        require((from == address(0) && to != address(0)) || (from != address(0) && to == address(0)),
+            "Only mint or burn transfers are allowed"
+        );
+        super._beforeTokenTransfer(from, to, tokenId);
     }
 }
