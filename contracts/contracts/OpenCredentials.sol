@@ -32,7 +32,7 @@ contract OpenCredentials is IOpenCredentials, AccessControl, ChainlinkCredential
     /**
      * Callback function
      */
-    function fulfillVCIssuance(bytes32 requestId, bytes memory tokenURI) public recordChainlinkFulfillment(_requestId) {
+    function fulfillVCIssuance(bytes32 requestId, bytes memory tokenURI) public recordChainlinkFulfillment(requestId) {
         Request memory request = requestIdToRequest[requestId];
         vcNFT.mint(request.recipient, request.credentialId, string(abi.encodePacked(tokenURI)));
     }
