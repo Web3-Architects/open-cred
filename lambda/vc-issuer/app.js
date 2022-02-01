@@ -99,12 +99,13 @@ exports.lambdaHandler = async (event, context) => {
   console.log("Issuer DID", ceramic.did.id);
 
   try {
-    // const doc = await TileDocument.create(ceramic, finalDocument, {
-    //   controllers: [ceramic.did.id],
-    // });
+    const doc = await TileDocument.create(ceramic, finalDocument, {
+      controllers: [ceramic.did.id],
+    });
 
-    // streamId = doc.id.toString();
-    streamId = "mockStreamId";
+    streamId = doc.id.toString();
+    // streamId =
+    //   "kjzl6cwe1jw148ooqyinbqzeiwgkew118waumozfdbsl02yypaj5ict3iffzvne";
     console.log(`streamId: `, streamId);
   } catch (err) {
     console.error(`error creating Tile: `, err);
