@@ -61,10 +61,11 @@ exports.lambdaHandler = async (event, context) => {
   const credentialsData = {
     "@context": ["https://www.w3.org/2018/credentials/v1"],
     type: ["VerifiableCredential"],
+    issuer: ceramic.did.id,
     credentialSubject: {
       id: subject,
       certificate: {
-        entity: process.env.ENTITY_NAME,
+        issuerName: process.env.ENTITY_NAME,
         ...certificateDetails,
       },
     },
