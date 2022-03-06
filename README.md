@@ -15,17 +15,24 @@ This module is responsible for generating Verifiable Credentials from the data r
 Authentication is done with Ceramic and an Ed25519Provider.
 => A SEED and ENTITY_NAME must be provided as environment variables.
 
+Start locally with `sam local start-api --env-vars env.json --port 6000`
+
 ### External adapter
 Path: `/external-adapter`
 
-External adapter for a Chainlink node. It simply bridges requests with the VC Issuer. 
+External adapter for a Chainlink node. It simply bridges requests with the VC Issuer.
+
+Start locally with `yarn start`
 
 ### Contracts
 Path: `/contracts`
-- OpenCredentials.sol: Responsible for receiving requests to issue credentials and uses the Chainlink client and VCNFT contracts to fulfill them
-- ChainlinkCredentialsClient.sol: Chainlink client which handles jobs, fees, oracle requests
-- VCNFT: ERC721 smart contract for the on-chain part of the hybrid credentials. Modified to prevent transfers.
+- `ChainlinkCredentialsClient.sol`: Chainlink client which handles jobs, fees, oracle requests.
+- `OpenCredentials.sol` (inherits ChainlinkCredentialsClient): Responsible for receiving requests to issue credentials. It uses the Chainlink client and VCNFT contracts to fulfill them.
+- `VCNFT.sol`: ERC721 smart contract for the on-chain part of the hybrid credentials. Modified to prevent transfers.
 
+**Rinkeby deployments**:  
+OpenCredentials: 0x27187729F39de1bEB68e9Aa4E3D52240DD409730  
+VCNFT (for Open_Classes): 0x0D7f626141Ab3866533f98b4D4406b23e8bE7608
 
 
 ## Chainlink
