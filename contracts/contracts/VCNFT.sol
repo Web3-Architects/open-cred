@@ -24,7 +24,7 @@ contract VCNFT is IVCNFT, ERC721, ERC721URIStorage, Pausable, AccessControl {
     mapping(uint256 => bytes32) public tokenIdToLessonId;
 
 
-    constructor() ERC721("OpenClassesCredentials", "OCC") {
+    constructor(string memory name, string memory symbol) ERC721(name, symbol) {
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _setupRole(PAUSER_ROLE, msg.sender);
     }
