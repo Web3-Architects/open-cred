@@ -1,8 +1,34 @@
 # Open_Cred
 
+This repository is used to generate credentials that are both non-transferable NFTs and Verifiable Credentials at the same time. 
+It uses Chainlink and an AWS Lambda function.
+
+For context and a full overview of the project, please read this blog post first: 
+https://blog.raphaelroullet.com/hybrid-crypto-credentials-decentralized-learning/
+
+## Project structure
+
+### VC Issuer
+Path: `/lambda/vc-issuer`
+
+This module is responsible for generating Verifiable Credentials from the data received.
+Authentication is done with Ceramic and an Ed25519Provider.
+=> A SEED and ENTITY_NAME must be provided as environment variables.
+
+### External adapter
+Path: `/external-adapter`
+
+External adapter for a Chainlink node. It simply bridges requests with the VC Issuer. 
+
+### Contracts
+Path: `/contracts`
+- OpenCredentials.sol: Responsible for receiving requests to issue credentials and uses the Chainlink client and VCNFT contracts to fulfill them
+- ChainlinkCredentialsClient.sol: Chainlink client which handles jobs, fees, oracle requests
+- VCNFT: ERC721 smart contract for the on-chain part of the hybrid credentials. Modified to prevent transfers.
 
 
-# Chainlink
+
+## Chainlink
 ### Job Definition used
 
 ```TOML
